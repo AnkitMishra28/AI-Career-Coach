@@ -72,7 +72,7 @@ export async function getUserOnboardingStatus() {
     const { userId } = await auth();
     if (!userId) {
       console.error("No userId found in auth");
-      return { isOnboarded: false };
+      return { isOnboarded: false, error: "Not authenticated" };
     }
 
     console.log("Checking onboarding status for user:", userId);
@@ -88,7 +88,7 @@ export async function getUserOnboardingStatus() {
 
     console.log("User found:", user ? "Yes" : "No");
     if (!user) {
-      return { isOnboarded: false };
+      return { isOnboarded: false, error: "User not found" };
     }
 
     const isOnboarded = Boolean(
@@ -103,7 +103,15 @@ export async function getUserOnboardingStatus() {
       hasSkills: Boolean(user.skills?.length > 0),
     });
 
-    return { isOnboarded };
+    return { 
+      isOnboarded,
+      details: {
+        hasIndustry: Boolean(user.industry),
+        hasExperience: Boolean(user.experience),
+        hasBio: Boolean(user.bio),
+        hasSkills: Boolean(user.skills?.length > 0)
+      }
+    };
   } catch (error) {
     console.error("Error checking onboarding status:", error);
     console.error("Error details:", {
@@ -111,7 +119,7 @@ export async function getUserOnboardingStatus() {
       stack: error.stack,
       name: error.name
     });
-    return { isOnboarded: false };
+    return { isOnboarded: false, error: error.message };
   }
 }
 

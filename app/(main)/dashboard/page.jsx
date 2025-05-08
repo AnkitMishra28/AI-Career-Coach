@@ -28,14 +28,28 @@ export default async function DashboardPage() {
     }
 
     const { isOnboarded } = await getUserOnboardingStatus();
-
-    // If not onboarded, redirect to onboarding page
+    
+    // Instead of using redirect, return a component that will handle the redirect
     if (!isOnboarded) {
-      redirect("/onboarding");
+      return (
+        <div className="container mx-auto p-4">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <h2 className="text-yellow-800 font-semibold">Profile Setup Required</h2>
+            <p className="text-yellow-600 mt-2">
+              Please complete your profile setup to access industry insights.
+            </p>
+            <a 
+              href="/onboarding" 
+              className="mt-4 inline-block px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+            >
+              Complete Setup
+            </a>
+          </div>
+        </div>
+      );
     }
 
     const insights = await getIndustryInsights();
-
     return (
       <div className="container mx-auto">
         <DashboardView insights={insights} />
