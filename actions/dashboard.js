@@ -39,8 +39,12 @@ export const generateAIInsights = async (industry) => {
 export async function getIndustryInsights() {
   try {
     const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
+    if (!userId) {
+      console.error("No userId found in auth");
+      throw new Error("Unauthorized");
+    }
 
+    console.log("Fetching user with clerkUserId:", userId);
     const user = await db.user.findUnique({
       where: { clerkUserId: userId },
       include: {
@@ -48,13 +52,24 @@ export async function getIndustryInsights() {
       },
     });
 
-    if (!user) throw new Error("User not found");
-    if (!user.industry) throw new Error("User industry not set");
+    if (!user) {
+      console.error("No user found for clerkUserId:", userId);
+      throw new Error("User not found");
+    }
+    
+    if (!user.industry) {
+      console.error("No industry set for user:", userId);
+      throw new Error("User industry not set");
+    }
+
+    console.log("User industry:", user.industry);
 
     // If no insights exist, generate them
     if (!user.industryInsight) {
       try {
+        console.log("Generating new insights for industry:", user.industry);
         const insights = await generateAIInsights(user.industry);
+        console.log("Generated insights:", JSON.stringify(insights, null, 2));
 
         const industryInsight = await db.industryInsight.create({
           data: {
@@ -64,16 +79,28 @@ export async function getIndustryInsights() {
           },
         });
 
+        console.log("Created industry insight:", industryInsight.id);
         return industryInsight;
       } catch (error) {
         console.error("Error generating insights:", error);
+        console.error("Error details:", {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        });
         throw new Error("Failed to generate industry insights");
       }
     }
 
+    console.log("Returning existing insights for industry:", user.industry);
     return user.industryInsight;
   } catch (error) {
     console.error("getIndustryInsights error:", error);
+    console.error("Error details:", {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     throw error;
   }
 }
