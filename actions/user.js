@@ -60,7 +60,7 @@ export async function updateUser(data) {
     );
 
     revalidatePath("/");
-    return result.user;
+    return result.updatedUser;
   } catch (error) {
     console.error("Error updating user and industry:", error.message);
     throw new Error("Failed to update profile");
@@ -68,30 +68,49 @@ export async function updateUser(data) {
 }
 
 export async function getUserOnboardingStatus() {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Unauthorized");
-
-  const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
-  });
-
-  if (!user) throw new Error("User not found");
-
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      console.error("No userId found in auth");
+      return { isOnboarded: false };
+    }
+
+    console.log("Checking onboarding status for user:", userId);
     const user = await db.user.findUnique({
-      where: {
-        clerkUserId: userId,
-      },
+      where: { clerkUserId: userId },
       select: {
         industry: true,
+        experience: true,
+        bio: true,
+        skills: true,
       },
     });
 
-    return {
-      isOnboarded: !!user?.industry,
-    };
+    console.log("User found:", user ? "Yes" : "No");
+    if (!user) {
+      return { isOnboarded: false };
+    }
+
+    const isOnboarded = Boolean(
+      user.industry && user.experience && user.bio && user.skills?.length > 0
+    );
+
+    console.log("Onboarding status:", {
+      isOnboarded,
+      hasIndustry: Boolean(user.industry),
+      hasExperience: Boolean(user.experience),
+      hasBio: Boolean(user.bio),
+      hasSkills: Boolean(user.skills?.length > 0),
+    });
+
+    return { isOnboarded };
   } catch (error) {
     console.error("Error checking onboarding status:", error);
-    throw new Error("Failed to check onboarding status");
+    console.error("Error details:", {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    return { isOnboarded: false };
   }
 }

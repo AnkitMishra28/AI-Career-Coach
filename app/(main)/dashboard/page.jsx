@@ -26,7 +26,10 @@ export default async function DashboardPage() {
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <h2 className="text-red-800 font-semibold">Something went wrong</h2>
           <p className="text-red-600 mt-2">
-            We're having trouble loading your industry insights. Please try refreshing the page or contact support if the problem persists.
+            Error: {error.message || "Unknown error"}
+          </p>
+          <p className="text-red-600 mt-2">
+            Please try refreshing the page or contact support if the problem persists.
           </p>
         </div>
       </div>
