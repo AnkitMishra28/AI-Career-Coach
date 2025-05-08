@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { generateAIInsights } from "./dashboard";
 
 export async function updateUser(data) {
+  console.log("[updateUser] Called with data:", JSON.stringify(data, null, 2));
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
@@ -28,6 +29,7 @@ export async function updateUser(data) {
 
         // If industry doesn't exist, create it with default values
         if (!industryInsight) {
+          console.log("[updateUser] Industry insight not found, generating new insights for:", data.industry);
           const insights = await generateAIInsights(data.industry);
 
           industryInsight = await db.industryInsight.create({
@@ -40,6 +42,12 @@ export async function updateUser(data) {
         }
 
         // Now update the user
+        console.log("[updateUser] Updating user with:", {
+          industry: data.industry,
+          experience: data.experience,
+          bio: data.bio,
+          skills: data.skills,
+        });
         const updatedUser = await tx.user.update({
           where: {
             id: user.id,
@@ -62,7 +70,13 @@ export async function updateUser(data) {
     revalidatePath("/");
     return result.updatedUser;
   } catch (error) {
-    console.error("Error updating user and industry:", error.message);
+    console.error("[updateUser] Error updating user and industry:", error);
+    console.error("[updateUser] Error details:", {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      data,
+    });
     throw new Error("Failed to update profile");
   }
 }
