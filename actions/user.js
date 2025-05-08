@@ -114,3 +114,33 @@ export async function getUserOnboardingStatus() {
     return { isOnboarded: false };
   }
 }
+
+export async function checkUserExists() {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      console.error("No userId found in auth");
+      return { exists: false, error: "Not authenticated" };
+    }
+
+    console.log("Checking if user exists:", userId);
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+
+    console.log("User exists:", user ? "Yes" : "No");
+    return { 
+      exists: !!user,
+      user: user ? {
+        id: user.id,
+        industry: user.industry,
+        experience: user.experience,
+        bio: user.bio,
+        skills: user.skills
+      } : null
+    };
+  } catch (error) {
+    console.error("Error checking user existence:", error);
+    return { exists: false, error: error.message };
+  }
+}
