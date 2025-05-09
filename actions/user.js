@@ -17,6 +17,12 @@ export async function updateUser(data) {
   if (!user) throw new Error("User not found");
 
   try {
+    // Validate required fields
+    if (!data.industry) throw new Error("Industry is required");
+    if (!data.experience) throw new Error("Experience is required");
+    if (!data.bio) throw new Error("Bio is required");
+    if (!data.skills || !data.skills.length) throw new Error("At least one skill is required");
+
     // Start a transaction to handle both operations
     const result = await db.$transaction(
       async (tx) => {
@@ -30,15 +36,30 @@ export async function updateUser(data) {
         // If industry doesn't exist, create it with default values
         if (!industryInsight) {
           console.log("[updateUser] Industry insight not found, generating new insights for:", data.industry);
-          const insights = await generateAIInsights(data.industry);
-
-          industryInsight = await db.industryInsight.create({
-            data: {
-              industry: data.industry,
-              ...insights,
-              nextUpdate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            },
-          });
+          try {
+            const insights = await generateAIInsights(data.industry);
+            industryInsight = await tx.industryInsight.create({
+              data: {
+                industry: data.industry,
+                ...insights,
+                nextUpdate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+              },
+            });
+          } catch (error) {
+            console.error("[updateUser] Error generating insights:", error);
+            // Create industry insight with default values if AI generation fails
+            industryInsight = await tx.industryInsight.create({
+              data: {
+                industry: data.industry,
+                demandLevel: "Medium",
+                marketOutlook: "Neutral",
+                salaryRanges: [],
+                topSkills: [],
+                lastUpdated: new Date(),
+                nextUpdate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+              },
+            });
+          }
         }
 
         // Now update the user
@@ -68,7 +89,7 @@ export async function updateUser(data) {
     );
 
     revalidatePath("/");
-    return result.updatedUser;
+    return { success: true, user: result.updatedUser };
   } catch (error) {
     console.error("[updateUser] Error updating user and industry:", error);
     console.error("[updateUser] Error details:", {
@@ -77,7 +98,7 @@ export async function updateUser(data) {
       name: error.name,
       data,
     });
-    throw new Error("Failed to update profile");
+    return { success: false, error: error.message || "Failed to update profile" };
   }
 }
 

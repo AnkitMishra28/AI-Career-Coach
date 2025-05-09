@@ -56,12 +56,17 @@ const OnboardingForm = ({ industries }) => {
         .toLowerCase()
         .replace(/ /g, "-")}`;
 
-      await updateUserFn({
+      const result = await updateUserFn({
         ...values,
         industry: formattedIndustry,
       });
+
+      if (!result) {
+        throw new Error("Failed to update profile");
+      }
     } catch (error) {
       console.error("Onboarding error:", error);
+      toast.error(error.message || "Failed to complete profile. Please try again.");
     }
   };
 
@@ -70,8 +75,10 @@ const OnboardingForm = ({ industries }) => {
       toast.success("Profile completed successfully!");
       router.push("/dashboard");
       router.refresh();
+    } else if (updateResult?.error) {
+      toast.error(updateResult.error);
     }
-  }, [updateResult, updateLoading]);
+  }, [updateResult, updateLoading, router]);
 
   const watchIndustry = watch("industry");
 
