@@ -56,12 +56,11 @@ const OnboardingForm = ({ industries }) => {
         .toLowerCase()
         .replace(/ /g, "-")}`;
 
-      const skills = values.skills
-        .split(",")
-        .map((skill) => skill.trim())
-        .filter(Boolean);
-
-      if (skills.length === 0) {
+      let skills = values.skills;
+      if (typeof skills === "string") {
+        skills = skills.split(",").map((skill) => skill.trim()).filter(Boolean);
+      }
+      if (!Array.isArray(skills) || skills.length === 0) {
         toast.error("Please enter at least one skill");
         return;
       }
