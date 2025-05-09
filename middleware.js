@@ -10,14 +10,20 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  const { userId } = await auth();
+  try {
+    const { userId, redirectToSignIn } = await auth();
 
-  if (!userId && isProtectedRoute(req)) {
-    const { redirectToSignIn } = await auth();
-    return redirectToSignIn();
+    if (!userId && isProtectedRoute(req)) {
+      return redirectToSignIn();
+    }
+
+    return NextResponse.next();
+  } catch (error) {
+    // Log the error for debugging
+    console.error("Middleware error:", error);
+    // Optionally, redirect to sign-in or show a custom error page
+    return NextResponse.redirect("/sign-in");
   }
-
-  return NextResponse.next();
 });
 
 export const config = {
