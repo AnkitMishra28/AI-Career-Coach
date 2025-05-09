@@ -7,21 +7,25 @@ import { generateAIInsights } from "./dashboard";
 
 export async function updateUser(data) {
   console.log("[updateUser] Called with data:", JSON.stringify(data, null, 2));
-  const { userId } = await auth();
-  if (!userId) throw new Error("Unauthorized");
-
-  const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
-  });
-
-  if (!user) throw new Error("User not found");
-
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+
+    if (!user) {
+      return { success: false, error: "User not found" };
+    }
+
     // Validate required fields
-    if (!data.industry) throw new Error("Industry is required");
-    if (!data.experience) throw new Error("Experience is required");
-    if (!data.bio) throw new Error("Bio is required");
-    if (!data.skills || !data.skills.length) throw new Error("At least one skill is required");
+    if (!data.industry) return { success: false, error: "Industry is required" };
+    if (!data.experience && data.experience !== 0) return { success: false, error: "Experience is required" };
+    if (!data.bio) return { success: false, error: "Bio is required" };
+    if (!data.skills || !data.skills.length) return { success: false, error: "At least one skill is required" };
 
     // Start a transaction to handle both operations
     const result = await db.$transaction(
@@ -69,22 +73,27 @@ export async function updateUser(data) {
           bio: data.bio,
           skills: data.skills,
         });
+
+        // Ensure skills is an array
+        const skills = Array.isArray(data.skills) ? data.skills : 
+          (typeof data.skills === 'string' ? data.skills.split(',').map(s => s.trim()).filter(Boolean) : []);
+
         const updatedUser = await tx.user.update({
           where: {
             id: user.id,
           },
           data: {
             industry: data.industry,
-            experience: data.experience,
+            experience: parseInt(data.experience, 10),
             bio: data.bio,
-            skills: data.skills,
+            skills: skills,
           },
         });
 
         return { updatedUser, industryInsight };
       },
       {
-        timeout: 10000, // default: 5000
+        timeout: 20000, // increased timeout
       }
     );
 
@@ -98,7 +107,11 @@ export async function updateUser(data) {
       name: error.name,
       data,
     });
-    return { success: false, error: error.message || "Failed to update profile" };
+    return { 
+      success: false, 
+      error: error.message || "Failed to update profile",
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    };
   }
 }
 

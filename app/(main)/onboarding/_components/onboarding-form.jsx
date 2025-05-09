@@ -56,14 +56,30 @@ const OnboardingForm = ({ industries }) => {
         .toLowerCase()
         .replace(/ /g, "-")}`;
 
+      const skills = values.skills
+        .split(",")
+        .map((skill) => skill.trim())
+        .filter(Boolean);
+
+      if (skills.length === 0) {
+        toast.error("Please enter at least one skill");
+        return;
+      }
+
       const result = await updateUserFn({
         ...values,
         industry: formattedIndustry,
+        skills: skills,
       });
 
-      if (!result) {
-        throw new Error("Failed to update profile");
+      if (!result.success) {
+        toast.error(result.error || "Failed to complete profile. Please try again.");
+        return;
       }
+
+      toast.success("Profile completed successfully!");
+      router.push("/dashboard");
+      router.refresh();
     } catch (error) {
       console.error("Onboarding error:", error);
       toast.error(error.message || "Failed to complete profile. Please try again.");
@@ -71,16 +87,22 @@ const OnboardingForm = ({ industries }) => {
   };
 
   useEffect(() => {
-    if (updateResult?.success && !updateLoading) {
-      toast.success("Profile completed successfully!");
-      router.push("/dashboard");
-      router.refresh();
-    } else if (updateResult?.error) {
+    if (updateResult?.error) {
       toast.error(updateResult.error);
     }
-  }, [updateResult, updateLoading, router]);
+  }, [updateResult]);
 
   const watchIndustry = watch("industry");
+  const watchSkills = watch("skills");
+  const watchBio = watch("bio");
+  const watchExperience = watch("experience");
+  const isSubmitDisabled = 
+    updateLoading || 
+    !watchIndustry || 
+    !selectedIndustry || 
+    !watchSkills || 
+    !watchBio || 
+    watchExperience === undefined;
 
   return (
     <div className="flex items-center justify-center bg-background">
@@ -201,7 +223,11 @@ const OnboardingForm = ({ industries }) => {
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={updateLoading}>
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={isSubmitDisabled}
+            >
               {updateLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
