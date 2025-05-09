@@ -71,6 +71,11 @@ const OnboardingForm = ({ industries }) => {
         skills: skills,
       });
 
+      if (!result || typeof result.success === "undefined") {
+        toast.error("Something went wrong. Please try again.");
+        return;
+      }
+
       if (!result.success) {
         toast.error(result.error || "Failed to complete profile. Please try again.");
         return;
