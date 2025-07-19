@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Poppins', Arial, Helvetica, sans-serif;
+}
+
+@layer base {
+  :root {
+    --background: 222 100% 97%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --primary: 222 83% 57%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 16 100% 50%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 174 62% 47%;
+    --accent-foreground: 0 0% 100%;
+    --muted: 222 100% 92%;
+    --muted-foreground: 222 47% 40%;
+    --radius: 1rem;
+  }
+  .dark {
+    --background: 222 47% 11%;
+    --foreground: 0 0% 100%;
+    --card: 222 47% 16%;
+    --card-foreground: 0 0% 100%;
+    --primary: 222 83% 67%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 16 100% 60%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 174 62% 57%;
+    --accent-foreground: 0 0% 100%;
+    --muted: 222 47% 20%;
+    --muted-foreground: 222 47% 70%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .creative-gradient {
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  }
+  .creative-divider {
+    height: 6px;
+    width: 100%;
+    background: linear-gradient(90deg, #2563eb 0%, #f59e42 100%);
+    border-radius: 3px;
+    margin: 2rem 0;
+  }
+  .card-shadow {
+    box-shadow: 0 4px 24px 0 rgba(37,99,235,0.08), 0 1.5px 6px 0 rgba(124,58,237,0.08);
+  }
+  .transition-smooth {
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+}
+
+.hero-image-wrapper {
+  perspective: 1000px;
+}
+
+.hero-image {
+  /* transform: rotateX(20deg) scale(0.9) translateY(-50); */
+  transform: rotateX(15deg) scale(1);
+  transition: transform 0.5s ease-out;
+  will-change: transform;
+}
+
+.hero-image.scrolled {
+  transform: rotateX(0deg) scale(1) translateY(40px);
+}
+
+.grid-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.1) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.grid-background::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, transparent, rgba(0, 0, 0, 0.9));
+}
