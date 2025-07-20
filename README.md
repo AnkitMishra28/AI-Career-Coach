@@ -42,6 +42,9 @@ npm install
 # or
 yarn
 
+3️⃣ Create .env File
+Create a .env file in the root directory and add the following:
+
 DATABASE_URL=your_neon_db_url
 
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
