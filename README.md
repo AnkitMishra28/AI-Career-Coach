@@ -1,10 +1,10 @@
-# 🧠 AI Career Coach Platform
+# AI Career Coach Platform
 
 A full-stack AI-powered career assistant built with Next.js, Tailwind CSS, Prisma, Neon DB, Inngest, and Clerk for authentication. This platform enables users to generate tailored resumes, write custom cover letters, and prepare for job interviews with AI-powered mock interviews — all in one place.
 
 ---
 
-## 🚀 Features
+## Features
 
 - 🔐 **User Authentication** with Clerk (Sign up, Login, Onboarding)
 - 📄 **Resume Builder** – Fill details and generate a professional resume PDF
@@ -16,7 +16,7 @@ A full-stack AI-powered career assistant built with Next.js, Tailwind CSS, Prism
 
 ---
 
-## 🏗️ Tech Stack
+## Tech Stack
 
 | Tech         | Description                               |
 |--------------|-------------------------------------------|
@@ -31,7 +31,7 @@ A full-stack AI-powered career assistant built with Next.js, Tailwind CSS, Prism
 
 ---
 
-## 📦 Setup Instructions
+## Setup Instructions
 
 ### 1️⃣ Clone the Repository
 ```bash
