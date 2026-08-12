@@ -1,90 +1,64 @@
-import { getIndustryInsights } from "@/actions/dashboard";
+import { getDashboardData } from "@/actions/dashboard";
 import DashboardView from "./_component/dashboard-view";
 import { getUserOnboardingStatus, checkUserExists } from "@/actions/user";
-import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
   try {
-    // First check if user exists
     const { exists, user, error: userError } = await checkUserExists();
     if (!exists) {
-      console.error("User check failed:", userError);
       return (
-        <div className="container mx-auto p-4">
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <h2 className="text-yellow-800 font-semibold">Setup Required</h2>
-            <p className="text-yellow-600 mt-2">
-              Please complete your profile setup first.
-            </p>
-            <a 
-              href="/onboarding" 
-              className="mt-4 inline-block px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-            >
-              Go to Setup
-            </a>
-          </div>
+        <div className="max-w-4xl mx-auto p-6 my-8 glass-card rounded-2xl border border-amber-500/30 bg-amber-500/5 space-y-4">
+          <h2 className="text-xl font-bold text-amber-400">Profile Setup Required</h2>
+          <p className="text-sm text-muted-foreground">
+            Please complete your candidate profile setup to initialize your Career Telemetry Command Center.
+          </p>
+          <a 
+            href="/onboarding" 
+            className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs transition-all shadow-lg shadow-indigo-600/25"
+          >
+            Complete Setup &rarr;
+          </a>
         </div>
       );
     }
 
     const { isOnboarded } = await getUserOnboardingStatus();
-    
-    // Instead of using redirect, return a component that will handle the redirect
     if (!isOnboarded) {
       return (
-        <div className="container mx-auto p-4">
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <h2 className="text-yellow-800 font-semibold">Profile Setup Required</h2>
-            <p className="text-yellow-600 mt-2">
-              Please complete your profile setup to access industry insights.
-            </p>
-            <a 
-              href="/onboarding" 
-              className="mt-4 inline-block px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-            >
-              Complete Setup
-            </a>
-          </div>
+        <div className="max-w-4xl mx-auto p-6 my-8 glass-card rounded-2xl border border-amber-500/30 bg-amber-500/5 space-y-4">
+          <h2 className="text-xl font-bold text-amber-400">Profile Setup Required</h2>
+          <p className="text-sm text-muted-foreground">
+            Please complete your candidate setup to unlock your telemetry metrics, resume engine, and industry insights.
+          </p>
+          <a 
+            href="/onboarding" 
+            className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs transition-all shadow-lg shadow-indigo-600/25"
+          >
+            Complete Setup &rarr;
+          </a>
         </div>
       );
     }
 
-    const insights = await getIndustryInsights();
-    return (
-      <div className="container mx-auto">
-        <DashboardView insights={insights} />
-      </div>
-    );
+    const dashboardData = await getDashboardData();
+    return <DashboardView data={dashboardData} />;
   } catch (error) {
-    console.error("Dashboard error:", error);
-    // Log the full error details
-    console.error("Full error details:", {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
-    });
-    
+    if (error?.digest === "DYNAMIC_SERVER_USAGE" || error?.message?.includes("Dynamic server usage")) {
+      throw error;
+    }
+    console.error("Dashboard error:", error?.message || error);
     return (
-      <div className="container mx-auto p-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <h2 className="text-red-800 font-semibold">Something went wrong</h2>
-          <p className="text-red-600 mt-2">
-            Error: {error.message || "Unknown error"}
-          </p>
-          <p className="text-red-600 mt-2">
-            Please try refreshing the page or contact support if the problem persists.
-          </p>
-          <div className="mt-4 text-sm text-gray-600">
-            <p>Debug Info:</p>
-            <pre className="mt-2 p-2 bg-gray-100 rounded overflow-x-auto">
-              {JSON.stringify({
-                error: error.message,
-                type: error.name,
-                stack: error.stack
-              }, null, 2)}
-            </pre>
-          </div>
-        </div>
+      <div className="max-w-4xl mx-auto p-6 my-8 glass-card rounded-2xl border border-rose-500/30 bg-rose-500/5 space-y-4">
+        <h2 className="text-xl font-bold text-rose-400">Unable to load Command Center</h2>
+        <p className="text-sm text-muted-foreground">
+          {error?.message || "An unexpected error occurred while loading your career data."}
+        </p>
+        <a 
+          href="/dashboard" 
+          className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-medium border border-white/10"
+        >
+          Refresh Page
+        </a>
       </div>
     );
   }

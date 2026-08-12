@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,12 +20,18 @@ export default async function EditCoverLetterPage({ params }) {
           </Button>
         </Link>
 
-        <h1 className="text-6xl font-bold gradient-title mb-6">
+        <h1 className="page-title mb-6">
           {coverLetter?.jobTitle} at {coverLetter?.companyName}
         </h1>
       </div>
 
-      <CoverLetterPreview content={coverLetter?.content} />
+      <CoverLetterPreview
+        id={id}
+        content={coverLetter?.content}
+        companyName={coverLetter?.companyName}
+        jobTitle={coverLetter?.jobTitle}
+        jobDescription={coverLetter?.jobDescription}
+      />
     </div>
   );
 }

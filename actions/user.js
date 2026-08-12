@@ -3,6 +3,7 @@
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { buildTemplateInsights } from "@/lib/industry-insights";
 import { generateAIInsights } from "./dashboard";
 
 export async function updateUser(data) {
@@ -52,14 +53,14 @@ export async function updateUser(data) {
           } catch (error) {
             console.error("[updateUser] Error generating insights:", error);
             // Create industry insight with default values if AI generation fails
+            const fallbackInsights = buildTemplateInsights(
+              data.industry,
+              Array.isArray(data.skills) ? data.skills : []
+            );
             industryInsight = await tx.industryInsight.create({
               data: {
                 industry: data.industry,
-                demandLevel: "Medium",
-                marketOutlook: "Neutral",
-                salaryRanges: [],
-                topSkills: [],
-                lastUpdated: new Date(),
+                ...fallbackInsights,
                 nextUpdate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
               },
             });
@@ -139,14 +140,15 @@ export async function getUserOnboardingStatus() {
       return { isOnboarded: false, error: "User not found" };
     }
 
+    const hasExperience = user.experience !== null && user.experience !== undefined;
     const isOnboarded = Boolean(
-      user.industry && user.experience && user.bio && user.skills?.length > 0
+      user.industry && hasExperience && user.bio && user.skills?.length > 0
     );
 
     console.log("Onboarding status:", {
       isOnboarded,
       hasIndustry: Boolean(user.industry),
-      hasExperience: Boolean(user.experience),
+      hasExperience,
       hasBio: Boolean(user.bio),
       hasSkills: Boolean(user.skills?.length > 0),
     });
@@ -155,12 +157,15 @@ export async function getUserOnboardingStatus() {
       isOnboarded,
       details: {
         hasIndustry: Boolean(user.industry),
-        hasExperience: Boolean(user.experience),
+        hasExperience,
         hasBio: Boolean(user.bio),
         hasSkills: Boolean(user.skills?.length > 0)
       }
     };
   } catch (error) {
+    if (error?.digest === "DYNAMIC_SERVER_USAGE" || error?.message?.includes("Dynamic server usage")) {
+      throw error;
+    }
     console.error("Error checking onboarding status:", error);
     console.error("Error details:", {
       message: error.message,
@@ -196,7 +201,11 @@ export async function checkUserExists() {
       } : null
     };
   } catch (error) {
+    if (error?.digest === "DYNAMIC_SERVER_USAGE" || error?.message?.includes("Dynamic server usage")) {
+      throw error;
+    }
     console.error("Error checking user existence:", error);
     return { exists: false, error: error.message };
   }
 }
+

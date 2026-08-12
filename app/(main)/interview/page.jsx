@@ -8,8 +8,8 @@ export default async function InterviewPrepPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-5">
-        <h1 className="text-6xl font-bold gradient-title">
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="page-title">
           Interview Preparation
         </h1>
       </div>

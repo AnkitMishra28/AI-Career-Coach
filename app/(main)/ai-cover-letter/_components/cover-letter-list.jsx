@@ -40,13 +40,21 @@ export default function CoverLetterList({ coverLetters }) {
 
   if (!coverLetters?.length) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>No Cover Letters Yet</CardTitle>
-          <CardDescription>
-            Create your first cover letter to get started
-          </CardDescription>
-        </CardHeader>
+      <Card className="glass-card border border-white/10 text-center py-12">
+        <CardContent className="space-y-3">
+          <div className="h-12 w-12 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 mx-auto">
+            <Edit2 className="h-6 w-6" />
+          </div>
+          <h3 className="text-base font-bold text-foreground">No Cover Letters Created Yet</h3>
+          <p className="text-xs text-muted-foreground max-w-md mx-auto">
+            Generate tailored, ATS-friendly cover letters for specific job postings in seconds.
+          </p>
+          <div className="pt-2">
+            <Button onClick={() => router.push("/ai-cover-letter/new")} className="rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold">
+              Create First Cover Letter &rarr;
+            </Button>
+          </div>
+        </CardContent>
       </Card>
     );
   }

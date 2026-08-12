@@ -48,7 +48,17 @@ const OnboardingForm = ({ industries }) => {
     watch,
   } = useForm({
     resolver: zodResolver(onboardingSchema),
+    defaultValues: {
+      experience: 0,
+    },
   });
+
+  // All hooks declared at top of component body
+  useEffect(() => {
+    if (updateResult?.error) {
+      toast.error(updateResult.error);
+    }
+  }, [updateResult]);
 
   const onSubmit = async (values) => {
     try {
@@ -67,6 +77,7 @@ const OnboardingForm = ({ industries }) => {
 
       const result = await updateUserFn({
         ...values,
+        experience: typeof values.experience === "number" ? values.experience : Number(values.experience),
         industry: formattedIndustry,
         skills: skills,
       });
@@ -90,12 +101,6 @@ const OnboardingForm = ({ industries }) => {
     }
   };
 
-  useEffect(() => {
-    if (updateResult?.error) {
-      toast.error(updateResult.error);
-    }
-  }, [updateResult]);
-
   const watchIndustry = watch("industry");
   const watchSkills = watch("skills");
   const watchBio = watch("bio");
@@ -106,37 +111,40 @@ const OnboardingForm = ({ industries }) => {
     !selectedIndustry || 
     !watchSkills || 
     !watchBio || 
-    watchExperience === undefined;
+    watchExperience === undefined ||
+    watchExperience === null ||
+    watchExperience === "" ||
+    isNaN(Number(watchExperience));
 
   return (
-    <div className="flex items-center justify-center bg-background">
-      <Card className="w-full max-w-lg mt-10 mx-2">
-        <CardHeader>
-          <CardTitle className="gradient-title text-4xl">
-            Complete Your Profile
+    <div className="flex items-center justify-center bg-background min-h-screen py-10 px-4">
+      <Card className="w-full max-w-lg glass-card border border-indigo-500/20 shadow-2xl">
+        <CardHeader className="text-center space-y-2">
+          <CardTitle className="text-2xl font-extrabold tracking-tight text-foreground">
+            Complete Your Professional Profile
           </CardTitle>
-          <CardDescription>
-            Select your industry to get personalized career insights and
-            recommendations.
+          <CardDescription className="text-xs text-muted-foreground">
+            Select your industry specialization and skills to tailor AI resume suggestions and mock interviews.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="industry">Industry</Label>
+              <Label htmlFor="industry" className="text-xs font-mono font-semibold uppercase text-muted-foreground">
+                Industry Sector
+              </Label>
               <Select
                 onValueChange={(value) => {
+                  const ind = industries.find((i) => i.id === value);
+                  setSelectedIndustry(ind);
                   setValue("industry", value);
-                  setSelectedIndustry(
-                    industries.find((ind) => ind.id === value)
-                  );
                   setValue("subIndustry", "");
                 }}
               >
-                <SelectTrigger id="industry">
+                <SelectTrigger id="industry" className="bg-white/[0.02]">
                   <SelectValue placeholder="Select an industry" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-[#0d1117] border-white/15">
                   <SelectGroup>
                     <SelectLabel>Industries</SelectLabel>
                     {industries.map((ind) => (
@@ -148,25 +156,25 @@ const OnboardingForm = ({ industries }) => {
                 </SelectContent>
               </Select>
               {errors.industry && (
-                <p className="text-sm text-red-500">
-                  {errors.industry.message}
-                </p>
+                <p className="text-xs text-rose-400 font-medium">{errors.industry.message}</p>
               )}
             </div>
 
-            {watchIndustry && (
+            {selectedIndustry && (
               <div className="space-y-2">
-                <Label htmlFor="subIndustry">Specialization</Label>
+                <Label htmlFor="subIndustry" className="text-xs font-mono font-semibold uppercase text-muted-foreground">
+                  Specialization / Domain
+                </Label>
                 <Select
                   onValueChange={(value) => setValue("subIndustry", value)}
                 >
-                  <SelectTrigger id="subIndustry">
-                    <SelectValue placeholder="Select your specialization" />
+                  <SelectTrigger id="subIndustry" className="bg-white/[0.02]">
+                    <SelectValue placeholder="Select a specialization" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-[#0d1117] border-white/15">
                     <SelectGroup>
                       <SelectLabel>Specializations</SelectLabel>
-                      {selectedIndustry?.subIndustries.map((sub) => (
+                      {selectedIndustry.subIndustries.map((sub) => (
                         <SelectItem key={sub} value={sub}>
                           {sub}
                         </SelectItem>
@@ -175,70 +183,72 @@ const OnboardingForm = ({ industries }) => {
                   </SelectContent>
                 </Select>
                 {errors.subIndustry && (
-                  <p className="text-sm text-red-500">
-                    {errors.subIndustry.message}
-                  </p>
+                  <p className="text-xs text-rose-400 font-medium">{errors.subIndustry.message}</p>
                 )}
               </div>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="experience">Years of Experience</Label>
+              <Label htmlFor="experience" className="text-xs font-mono font-semibold uppercase text-muted-foreground">
+                Years of Professional Experience
+              </Label>
               <Input
                 id="experience"
                 type="number"
                 min="0"
                 max="50"
-                placeholder="Enter years of experience"
-                {...register("experience")}
+                placeholder="e.g. 5"
+                className="bg-white/[0.02]"
+                {...register("experience", { valueAsNumber: true })}
               />
               {errors.experience && (
-                <p className="text-sm text-red-500">
-                  {errors.experience.message}
-                </p>
+                <p className="text-xs text-rose-400 font-medium">{errors.experience.message}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="skills">Skills</Label>
+              <Label htmlFor="skills" className="text-xs font-mono font-semibold uppercase text-muted-foreground">
+                Key Technical & Professional Skills
+              </Label>
               <Input
                 id="skills"
-                placeholder="e.g., Python, JavaScript, Project Management"
+                placeholder="e.g. React, Next.js, Node.js, PostgreSQL, Docker, System Design"
+                className="bg-white/[0.02]"
                 {...register("skills")}
               />
-              <p className="text-sm text-muted-foreground">
-                Separate multiple skills with commas
-              </p>
+              <p className="text-[11px] text-muted-foreground">Separate skills with commas</p>
               {errors.skills && (
-                <p className="text-sm text-red-500">{errors.skills.message}</p>
+                <p className="text-xs text-rose-400 font-medium">{errors.skills.message}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="bio">Professional Bio</Label>
+              <Label htmlFor="bio" className="text-xs font-mono font-semibold uppercase text-muted-foreground">
+                Professional Bio / Career Focus
+              </Label>
               <Textarea
                 id="bio"
-                placeholder="Tell us about your professional background..."
-                className="h-32"
+                placeholder="Briefly describe your career background and what you are looking to achieve..."
+                className="h-28 text-xs bg-white/[0.02]"
                 {...register("bio")}
               />
               {errors.bio && (
-                <p className="text-sm text-red-500">{errors.bio.message}</p>
+                <p className="text-xs text-rose-400 font-medium">{errors.bio.message}</p>
               )}
             </div>
 
-            <Button 
-              type="submit" 
-              className="w-full" 
+            <Button
+              type="submit"
               disabled={isSubmitDisabled}
+              className="w-full rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs py-5 shadow-lg shadow-indigo-600/25"
             >
               {updateLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
+                  Saving Profile...
                 </>
               ) : (
-                "Complete Profile"
+                "Complete Onboarding & Enter Dashboard"
               )}
             </Button>
           </form>
