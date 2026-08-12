@@ -12,91 +12,73 @@
 # Error details
 
 ```
-Test timeout of 30000ms exceeded.
-```
+Error: expect(locator).toBeVisible() failed
 
-```
-Error: page.goto: Test timeout of 30000ms exceeded.
+Locator: locator('h1:has-text("Candidate Telemetry & Operations")').first()
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
 Call log:
-  - navigating to "http://localhost:3001/dashboard", waiting until "networkidle"
+  - Expect "toBeVisible" with timeout 5000ms
+  - waiting for locator('h1:has-text("Candidate Telemetry & Operations")').first()
 
 ```
-
-# Page snapshot
 
 ```yaml
-- generic [active] [ref=e1]:
-  - banner [ref=e2]:
-    - generic [ref=e4]:
-      - link "SenseAI Logo SenseAI" [ref=e5] [cursor=pointer]:
-        - /url: /
-        - img "SenseAI Logo" [ref=e7]
-        - generic [ref=e8]: SenseAI
-      - button "Sign In" [ref=e10] [cursor=pointer]
-  - main [ref=e11]:
-    - generic [ref=e13]:
-      - generic [ref=e14]:
-        - link "Back to SenseAI Home" [ref=e15] [cursor=pointer]:
-          - /url: /
-        - generic [ref=e18]:
-          - img "SenseAI Logo" [ref=e20]
-          - generic [ref=e21]: SenseAI Career OS
-      - generic [ref=e22]:
-        - generic [ref=e23]:
-          - generic [ref=e29]:
-            - paragraph [ref=e30]: "Career Health: 84/100"
-            - paragraph [ref=e31]: Top 12% of candidates
-          - generic [ref=e32]:
-            - paragraph [ref=e33]: "\"Landed 3 offers in 14 days using SenseAI's mock interviews.\""
-            - paragraph [ref=e34]: — SDE Candidate, Verified
-        - generic [ref=e37]:
-          - generic [ref=e38]:
-            - generic [ref=e40]:
-              - heading "Sign in to My Application" [level=1] [ref=e41]
-              - paragraph [ref=e42]: Welcome back! Please sign in to continue
-            - generic [ref=e43]:
-              - button "Sign in with Google Continue with Google" [ref=e46] [cursor=pointer]:
-                - generic [ref=e47]:
-                  - img "Sign in with Google" [ref=e49]
-                  - generic [ref=e50]: Continue with Google
-              - paragraph [ref=e53]: or
-              - generic [ref=e55]:
-                - generic [ref=e56]:
-                  - generic [ref=e59]:
-                    - generic [ref=e60]: Email address
-                    - textbox "Email address" [ref=e62]:
-                      - /placeholder: Enter your email address
-                  - generic:
-                    - generic:
-                      - generic:
-                        - generic: Password
-                        - generic:
-                          - textbox "Password":
-                            - /placeholder: Enter your password
-                          - button "Show password"
-                - button "Continue" [ref=e65] [cursor=pointer]
-          - generic [ref=e69]:
-            - generic [ref=e70]:
-              - generic [ref=e71]: Don’t have an account?
-              - link "Sign up" [ref=e72] [cursor=pointer]:
-                - /url: http://localhost:3001/sign-up#/?redirect_url=http%3A%2F%2Flocalhost%3A3001%2Fdashboard
-            - generic [ref=e74]:
-              - generic [ref=e76]:
-                - paragraph [ref=e77]: Secured by
-                - link "Clerk logo" [ref=e78] [cursor=pointer]:
-                  - /url: https://go.clerk.com/components
-              - paragraph [ref=e84]: Development mode
-        - generic [ref=e85]:
-          - generic [ref=e92]:
-            - paragraph [ref=e93]: "Resume ATS Match: 91%"
-            - paragraph [ref=e94]: Optimized for target roles
-          - generic [ref=e102]:
-            - paragraph [ref=e103]: Built for SDEs
-            - paragraph [ref=e104]: Free for job seekers
-      - generic [ref=e105]: Secure authentication powered by Clerk & SenseAI Engine
-  - region "Notifications alt+T"
-  - button "Open Next.js Dev Tools" [ref=e114] [cursor=pointer]
-  - alert [ref=e118]
+- banner:
+  - link "SenseAI Logo SenseAI":
+    - /url: /
+    - img "SenseAI Logo"
+    - text: SenseAI
+  - button "Sign In"
+- main:
+  - link "Back to SenseAI Home":
+    - /url: /
+    - img
+    - text: Back to SenseAI Home
+  - img "SenseAI Logo"
+  - text: SenseAI Career OS
+  - img
+  - paragraph: "Career Health: 84/100"
+  - paragraph: Top 12% of candidates
+  - paragraph: "\"Landed 3 offers in 14 days using SenseAI's mock interviews.\""
+  - paragraph: — SDE Candidate, Verified
+  - heading "Sign in to My Application" [level=1]
+  - paragraph: Welcome back! Please sign in to continue
+  - button "Sign in with Google Continue with Google":
+    - img "Sign in with Google"
+    - text: Continue with Google
+  - paragraph: or
+  - text: Email address
+  - textbox "Email address":
+    - /placeholder: Enter your email address
+  - text: Password
+  - textbox "Password":
+    - /placeholder: Enter your password
+  - button "Show password":
+    - img
+  - button "Continue":
+    - text: Continue
+    - img
+  - text: Don’t have an account?
+  - link "Sign up":
+    - /url: http://localhost:3000/sign-up#/?redirect_url=http%3A%2F%2Flocalhost%3A3000%2Fdashboard
+  - paragraph: Secured by
+  - link "Clerk logo":
+    - /url: https://go.clerk.com/components
+    - img
+  - paragraph: Development mode
+  - img
+  - paragraph: "Resume ATS Match: 91%"
+  - paragraph: Optimized for target roles
+  - img
+  - paragraph: Built for SDEs
+  - paragraph: Free for job seekers
+  - img
+  - text: Secure authentication powered by Clerk & SenseAI Engine
+- region "Notifications alt+T"
+- alert
 ```
 
 # Test source
@@ -104,7 +86,7 @@ Call log:
 ```ts
   1   | import { test, expect } from '@playwright/test';
   2   | 
-  3   | const BASE_URL = 'http://localhost:3001';
+  3   | const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
   4   | 
   5   | test.describe('SenseAI System & UI Verification', () => {
   6   | 
@@ -166,12 +148,12 @@ Call log:
   62  |     });
   63  |     page.on('pageerror', err => pageErrors.push(err.message));
   64  | 
-> 65  |     await page.goto(`${BASE_URL}/dashboard`, { waitUntil: 'domcontentloaded' });
-      |                ^ Error: page.goto: Test timeout of 30000ms exceeded.
+  65  |     await page.goto(`${BASE_URL}/dashboard`, { waitUntil: 'domcontentloaded' });
   66  | 
   67  |     // Verify dashboard title
   68  |     const dashboardTitle = page.locator('h1:has-text("Candidate Telemetry & Operations")').first();
-  69  |     await expect(dashboardTitle).toBeVisible();
+> 69  |     await expect(dashboardTitle).toBeVisible();
+      |                                  ^ Error: expect(locator).toBeVisible() failed
   70  | 
   71  |     // Verify View Demo Data button with Eye icon
   72  |     const viewDemoBtn = page.locator('button:has-text("View Demo Data"), a:has-text("View Demo Data")').first();

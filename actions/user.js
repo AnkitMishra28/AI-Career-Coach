@@ -5,21 +5,14 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { buildTemplateInsights } from "@/lib/industry-insights";
 import { generateAIInsights } from "./dashboard";
+import { checkUser } from "@/lib/checkUser";
 
 export async function updateUser(data) {
   console.log("[updateUser] Called with data:", JSON.stringify(data, null, 2));
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return { success: false, error: "Unauthorized" };
-    }
-
-    const user = await db.user.findUnique({
-      where: { clerkUserId: userId },
-    });
-
+    const user = await checkUser();
     if (!user) {
-      return { success: false, error: "User not found" };
+      return { success: false, error: "Unauthorized or User not found" };
     }
 
     // Validate required fields
@@ -118,26 +111,9 @@ export async function updateUser(data) {
 
 export async function getUserOnboardingStatus() {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      console.error("No userId found in auth");
-      return { isOnboarded: false, error: "Not authenticated" };
-    }
-
-    console.log("Checking onboarding status for user:", userId);
-    const user = await db.user.findUnique({
-      where: { clerkUserId: userId },
-      select: {
-        industry: true,
-        experience: true,
-        bio: true,
-        skills: true,
-      },
-    });
-
-    console.log("User found:", user ? "Yes" : "No");
+    const user = await checkUser();
     if (!user) {
-      return { isOnboarded: false, error: "User not found" };
+      return { isOnboarded: false, error: "Not authenticated" };
     }
 
     const hasExperience = user.experience !== null && user.experience !== undefined;
@@ -163,45 +139,41 @@ export async function getUserOnboardingStatus() {
       }
     };
   } catch (error) {
-    if (error?.digest === "DYNAMIC_SERVER_USAGE" || error?.message?.includes("Dynamic server usage")) {
+    if (
+      error?.digest === "DYNAMIC_SERVER_USAGE" || 
+      error?.message?.includes("Dynamic server usage") ||
+      error?.digest?.startsWith("NEXT_REDIRECT")
+    ) {
       throw error;
     }
     console.error("Error checking onboarding status:", error);
-    console.error("Error details:", {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
-    });
     return { isOnboarded: false, error: error.message };
   }
 }
 
 export async function checkUserExists() {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      console.error("No userId found in auth");
+    const user = await checkUser();
+    if (!user) {
       return { exists: false, error: "Not authenticated" };
     }
 
-    console.log("Checking if user exists:", userId);
-    const user = await db.user.findUnique({
-      where: { clerkUserId: userId },
-    });
-
-    console.log("User exists:", user ? "Yes" : "No");
     return { 
-      exists: !!user,
-      user: user ? {
+      exists: true,
+      user: {
         id: user.id,
         industry: user.industry,
         experience: user.experience,
         bio: user.bio,
         skills: user.skills
-      } : null
+      }
     };
   } catch (error) {
-    if (error?.digest === "DYNAMIC_SERVER_USAGE" || error?.message?.includes("Dynamic server usage")) {
+    if (
+      error?.digest === "DYNAMIC_SERVER_USAGE" || 
+      error?.message?.includes("Dynamic server usage") ||
+      error?.digest?.startsWith("NEXT_REDIRECT")
+    ) {
       throw error;
     }
     console.error("Error checking user existence:", error);

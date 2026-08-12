@@ -1,5 +1,5 @@
 import { SignIn } from "@clerk/nextjs";
 
 export default function Page() {
-  return <SignIn fallbackRedirectUrl="/onboarding" signUpUrl="/sign-up" />;
+  return <SignIn />;
 }
