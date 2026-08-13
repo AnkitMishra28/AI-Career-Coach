@@ -98,33 +98,33 @@ SenseAI is architected around **Next.js 15 App Router**, utilizing server-side r
 ```mermaid
 flowchart TD
     subgraph Client ["Client Layer (React 19 / Tailwind / Radix)"]
-        UI[Landing Page & Workspaces]
-        Demo[Interactive Sandbox (/demo)]
-        Voice[Web Speech API Audio Dictation]
+        UI["Landing Page & Workspaces"]
+        Demo["Interactive Sandbox (/demo)"]
+        Voice["Web Speech API Audio Dictation"]
     end
 
     subgraph AuthSecurity ["Authentication & Guardrails"]
-        Clerk[Clerk Auth v6]
-        MW[Next.js Route Matcher Middleware]
-        Zod[Zod Schema Validation]
+        Clerk["Clerk Auth v6"]
+        MW["Next.js Route Matcher Middleware"]
+        Zod["Zod Schema Validation"]
     end
 
     subgraph ServerLayer ["Server Execution Layer (Next.js 15)"]
-        SA_User[User & Onboarding Action]
-        SA_Resume[Resume & ATS Audit Action]
-        SA_Interview[Mock Interview Action]
-        SA_Letter[Cover Letter Action]
-        SA_Dash[Command Center Telemetry Action]
+        SA_User["User & Onboarding Action"]
+        SA_Resume["Resume & ATS Audit Action"]
+        SA_Interview["Mock Interview Action"]
+        SA_Letter["Cover Letter Action"]
+        SA_Dash["Command Center Telemetry Action"]
     end
 
     subgraph ExternalServices ["External Engines & Background Workers"]
-        Gemini[Google Gemini API<br/>gemini-3.1-flash-lite]
-        Inngest[Inngest Background Cron<br/>Weekly Market Sync]
+        Gemini["Google Gemini API<br/>gemini-3.1-flash-lite"]
+        Inngest["Inngest Background Cron<br/>Weekly Market Sync"]
     end
 
     subgraph DatabaseLayer ["Data Persistence"]
-        Prisma[Prisma ORM v6.7]
-        Postgres[(PostgreSQL / Neon DB)]
+        Prisma["Prisma ORM v6.7"]
+        Postgres[("PostgreSQL / Neon DB")]
     end
 
     UI --> MW --> Clerk
